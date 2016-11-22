@@ -1,4 +1,4 @@
-package com.example.bruno.casainteligente;
+package com.smarthouse_br.smarthouse;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.bruno.casainteligente", appContext.getPackageName());
+        assertEquals("com.smarthouse_br.smarthouse", appContext.getPackageName());
     }
 }

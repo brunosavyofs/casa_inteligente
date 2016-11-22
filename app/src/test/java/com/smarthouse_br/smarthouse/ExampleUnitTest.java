@@ -1,4 +1,4 @@
-package com.example.bruno.casainteligente;
+package com.smarthouse_br.smarthouse;
 
 import org.junit.Test;
 
