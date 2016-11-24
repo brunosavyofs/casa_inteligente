@@ -7,21 +7,42 @@
 #include <SPI.h>
 #include <Ethernet.h>
 
-IPAddress server(192, 168, 0, 108);
+//IPAddress ip(10, 60, 20, 15);
+//IPAddress server("m13.cloudmqtt.com");
+char server[] = "m13.cloudmqtt.com";
 EthernetClient ethClient;
 
 // Endereco MAC da shield ethernet
 byte mac[] = {
-  0x64, 0x1c, 0x67, 0x79, 0xc5, 0xb3
+  0xf8, 0xb1, 0x56, 0xfc, 0x4c, 0xc4
 };
 
 
 // Configurações da comunicação com mosquitto
 #include <PubSubClient.h>
 
-#define PORTA_MQTT 1883
+#define PORTA_MQTT 18768
+#define USUARIO_MQTT "mdzjtvif"
+#define SENHA_MQTT "snX5gG5TJs8P"
+char MENSAGEM_BROKER[100];
+//#define PORTA_MQTT 1883
 
-PubSubClient client(ethClient);
+void callback(char* topic, byte* payload, unsigned int length);
+
+PubSubClient client(server, PORTA_MQTT, callback, ethClient);
+void callback(char* topic, byte* payload, unsigned int length) {
+  int i = 0;
+  Serial.println("Menssagem recebida:  " + String(topic));
+
+  for(i=0; i<length; i++)
+  {
+    MENSAGEM_BROKER[i] = payload[i];
+  }
+  MENSAGEM_BROKER[i] = '\0';
+  String msgString = String(MENSAGEM_BROKER);
+
+  Serial.println("Payload: " + msgString);
+}
 
 
 // Configurações da funcionalidade 01 - Acionamento automático do ar condicionado
@@ -36,7 +57,7 @@ PubSubClient client(ethClient);
 
 #define TIPO_SENSOR DHT11
 #define PINO_SENSOR_TEMP A1
-#define TEMPERATURA_ACIONAMENTO 25.0
+#define TEMPERATURA_ACIONAMENTO 15
 #define PINO_LED_AR 2
 #define TP_AR_TEMPERATURA "casa/ar/temperatura"
 #define TP_AR_STATUS "casa/ar/status"
@@ -59,13 +80,17 @@ void setup() {
 
   conectar_ethernet();
 
-  conectar_mosquitto();
+//  conectar_mosquitto();
 
   // Setup da funcionalidade 01
   setup_ar();
 }
 
 void loop() {
+  if (!client.connected())
+  {
+    conectar_mosquitto();
+  }
   ler_temperatura();
   Narcoleptic.delay(1000);
 }
@@ -102,17 +127,18 @@ void ler_temperatura() {
 // Métodos auxiliares
 
 void conectar_mosquitto() {
-  client.setServer(server, PORTA_MQTT);
+//  client.setServer(server, PORTA_MQTT);
 
   while (!client.connected()) {
     Serial.print("Conectando com mosquitto broker...");
-    if (client.connect("casa")) {
+    if (client.connect("casa", "mdzjtvif", "snX5gG5TJs8P")) {
+//    if (client.connect("casa")) {
       Serial.println(" conectado!");
     } else {
       Serial.print("falha, rc=");
       Serial.println(client.state());
     }
-    Narcoleptic.delay(TEMPO_NOVA_TENTATIVA);
+    delay(TEMPO_NOVA_TENTATIVA);
   }
 }
 
