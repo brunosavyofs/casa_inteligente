@@ -14,7 +14,9 @@ EthernetClient ethClient;
 
 // Endereco MAC da shield ethernet
 byte mac[] = {
-  0xf8, 0xb1, 0x56, 0xfc, 0x4c, 0xc4
+//  f8:b1:56:fc:4d:d3
+//  0xf8, 0xb1, 0x56, 0xfc, 0x4c, 0xc4
+  0xf8, 0xb1, 0x56, 0xfc, 0x4d, 0xd3
 };
 
 
@@ -24,25 +26,10 @@ byte mac[] = {
 #define PORTA_MQTT 18768
 #define USUARIO_MQTT "mdzjtvif"
 #define SENHA_MQTT "snX5gG5TJs8P"
-char MENSAGEM_BROKER[100];
-//#define PORTA_MQTT 1883
 
-void callback(char* topic, byte* payload, unsigned int length);
+void callback(char* topic, byte* payload, unsigned int length) {}
 
 PubSubClient client(server, PORTA_MQTT, callback, ethClient);
-void callback(char* topic, byte* payload, unsigned int length) {
-  int i = 0;
-  Serial.println("Menssagem recebida:  " + String(topic));
-
-  for(i=0; i<length; i++)
-  {
-    MENSAGEM_BROKER[i] = payload[i];
-  }
-  MENSAGEM_BROKER[i] = '\0';
-  String msgString = String(MENSAGEM_BROKER);
-
-  Serial.println("Payload: " + msgString);
-}
 
 
 // Configurações da funcionalidade 01 - Acionamento automático do ar condicionado
