@@ -83,7 +83,7 @@ void ler_temperatura() {
   float temperatura = dht.readTemperature();
   // testa se retorno é valido, caso contrário algo está errado.
   if (isnan(temperatura)) {
-    Serial.println("Failed to read from DHT");
+    Serial.println("Falha ao ler temperatura.");
   } 
   else {
     Serial.print("Temperatura: ");
@@ -105,31 +105,31 @@ void conectar_mosquitto() {
   client.setServer(server, PORTA_MQTT);
 
   while (!client.connected()) {
-    Serial.print("Tentando conexao com mosquitto...");
+    Serial.print("Conectando com mosquitto broker...");
     if (client.connect("casa")) {
       Serial.println(" conectado!");
     } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
+      Serial.print("falha, rc=");
+      Serial.println(client.state());
     }
     Narcoleptic.delay(TEMPO_NOVA_TENTATIVA);
   }
 }
 
 void conectar_ethernet() {
-  while (!Ethernet.begin(mac)) {
-    Serial.print("Tentando conexao com Ethernet Shield utilizando DHCP... ");
+  while (true) {
+    Serial.print("Conectando na rede com Ethernet Shield utilizando DHCP... ");
+    if (Ethernet.begin(mac)) break;
     Narcoleptic.delay(TEMPO_NOVA_TENTATIVA);
   }
   printIPAddress();
 }
 
 void printIPAddress() {
-  Serial.print("Meu IP: ");
+  Serial.print("IP: ");
   for (byte thisByte = 0; thisByte < 4; thisByte++) {
     Serial.print(Ethernet.localIP()[thisByte], DEC);
     Serial.print(".");
   }
-  Serial.println();
+  Serial.println("");
 }
