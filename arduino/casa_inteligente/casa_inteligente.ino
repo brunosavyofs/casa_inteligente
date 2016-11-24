@@ -42,7 +42,7 @@ PubSubClient client(ethClient);
 #define TP_AR_STATUS "casa/ar/status"
 
 //float temperatura;
-boolean aciona_ar = false;
+int status_ar = LOW;
 
 DHT dht(PINO_SENSOR_TEMP, TIPO_SENSOR);
 
@@ -55,7 +55,7 @@ DHT dht(PINO_SENSOR_TEMP, TIPO_SENSOR);
 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   conectar_ethernet();
 
@@ -67,7 +67,7 @@ void setup() {
 
 void loop() {
   ler_temperatura();
-  Narcoleptic.delay(1000);
+  Narcoleptic.delay(5000);
 }
 
 
@@ -79,7 +79,7 @@ void setup_ar() {
   dht.begin();
 }
 
-void ler_temperatura() {
+int ler_temperatura() {
   float temperatura = dht.readTemperature();
   // testa se retorno é valido, caso contrário algo está errado.
   if (isnan(temperatura)) {
@@ -91,10 +91,27 @@ void ler_temperatura() {
     if (temperatura > TEMPERATURA_ACIONAMENTO)  {
       Serial.print("Temperatura > ");
       Serial.println(TEMPERATURA_ACIONAMENTO);
+ 
       digitalWrite(PINO_LED_AR, HIGH);
+      informar_temperatura(temperatura, HIGH);
     } else {
       digitalWrite(PINO_LED_AR, LOW);
+      informar_temperatura(temperatura, LOW);
     }
+  }
+}
+
+void informar_temperatura(float temperatura, int status_ar_) {
+  // Variável auxiliar para implementar gambiarra para converter para char[]
+  char aux_char[10];
+  String(temperatura).toCharArray(aux_char, 10);
+  client.publish(TP_AR_TEMPERATURA, aux_char);
+  
+  if (status_ar != status_ar_) {
+    Serial.println("Informa mudanca de status do ar condicionado.");
+    status_ar = status_ar_;
+    String(status_ar).toCharArray(aux_char, 10);
+    client.publish(TP_AR_STATUS, aux_char);
   }
 }
 
