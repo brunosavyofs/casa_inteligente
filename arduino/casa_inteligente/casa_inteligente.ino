@@ -27,7 +27,7 @@ byte mac[] = {
 #define USUARIO_MQTT "mdzjtvif"
 #define SENHA_MQTT "snX5gG5TJs8P"
 
-void callback(char* topic, byte* payload, unsigned int length) {}
+void callback(char* topic, byte* payload, unsigned int length);
 
 PubSubClient client(server, PORTA_MQTT, callback, ethClient);
 
@@ -78,8 +78,19 @@ void loop() {
   {
     conectar_mosquitto();
   }
+  client.loop();
   ler_temperatura();
   Narcoleptic.delay(5000);
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i=0;i<length;i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
 }
 
 
@@ -129,20 +140,19 @@ void informar_temperatura(float temperatura, int status_ar_) {
 
 
 // Métodos auxiliares
-
+ 
 void conectar_mosquitto() {
-//  client.setServer(server, PORTA_MQTT);
 
   while (!client.connected()) {
     Serial.print("Conectando com mosquitto broker...");
-    if (client.connect("casa", "mdzjtvif", "snX5gG5TJs8P")) {
-//    if (client.connect("casa")) {
+    if (client.connect("casa", USUARIO_MQTT, SENHA_MQTT)) {
       Serial.println(" conectado!");
+      client.subscribe("casa/ar/status");
     } else {
       Serial.print("falha, rc=");
       Serial.println(client.state());
+      delay(TEMPO_NOVA_TENTATIVA);
     }
-    delay(TEMPO_NOVA_TENTATIVA);
   }
 }
 
