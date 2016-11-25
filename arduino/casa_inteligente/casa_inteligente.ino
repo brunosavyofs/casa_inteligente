@@ -26,6 +26,7 @@ byte mac[] = {
 #define PORTA_MQTT 18768
 #define USUARIO_MQTT "mdzjtvif"
 #define SENHA_MQTT "snX5gG5TJs8P"
+char MENSAGEM_BROKER[100];
 
 void callback(char* topic, byte* payload, unsigned int length);
 
@@ -63,7 +64,7 @@ DHT dht(PINO_SENSOR_TEMP, TIPO_SENSOR);
 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   conectar_ethernet();
 
@@ -83,14 +84,23 @@ void loop() {
   Narcoleptic.delay(5000);
 }
 
+// Metodo para manipular mensagens recebidas do broker
 void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  for (int i=0;i<length;i++) {
-    Serial.print((char)payload[i]);
+  int i = 0;
+  Serial.println("Tópico:  " + String(topic));
+
+  for(i=0; i<length; i++) {
+    MENSAGEM_BROKER[i] = payload[i];
   }
-  Serial.println();
+  MENSAGEM_BROKER[i] = '\0';
+  String msgString = String(MENSAGEM_BROKER);
+
+  Serial.println("Mensagem: " + msgString);
+
+  //TODO: Utilizar um case
+  if (String(topic) == String(TP_AR_STATUS)) {
+    ligar_ar(msgString.toInt());
+  }
 }
 
 
@@ -111,31 +121,21 @@ int ler_temperatura() {
   else {
     Serial.print("Temperatura: ");
     Serial.println(temperatura);
-    if (temperatura > TEMPERATURA_ACIONAMENTO)  {
-      Serial.print("Temperatura > ");
-      Serial.println(TEMPERATURA_ACIONAMENTO);
- 
-      digitalWrite(PINO_LED_AR, HIGH);
-      informar_temperatura(temperatura, HIGH);
-    } else {
-      digitalWrite(PINO_LED_AR, LOW);
-      informar_temperatura(temperatura, LOW);
-    }
+    informar_temperatura(temperatura);
   }
 }
 
-void informar_temperatura(float temperatura, int status_ar_) {
+void informar_temperatura(float temperatura) {
   // Variável auxiliar para implementar gambiarra para converter para char[]
   char aux_char[10];
   String(temperatura).toCharArray(aux_char, 10);
   client.publish(TP_AR_TEMPERATURA, aux_char);
-  
-  if (status_ar != status_ar_) {
-    Serial.println("Informa mudanca de status do ar condicionado.");
-    status_ar = status_ar_;
-    String(status_ar).toCharArray(aux_char, 10);
-    client.publish(TP_AR_STATUS, aux_char);
-  }
+}
+
+void ligar_ar(int status) {
+    digitalWrite(PINO_LED_AR, status);
+
+    // Código para ligar o ar
 }
 
 
