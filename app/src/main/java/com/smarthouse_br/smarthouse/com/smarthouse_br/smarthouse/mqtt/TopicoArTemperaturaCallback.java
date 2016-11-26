@@ -18,7 +18,7 @@ public class TopicoArTemperaturaCallback extends Activity implements TopicoCallb
     private static final String TAG = "ArTemperatura";
     private Context context;
 
-    public final String ID_TOPICO = "casa/ar/temperatura";
+    public static final String ID_TOPICO = "casa/ar/temperatura";
 
     private static final double TEMPERATURA_ACIONAMENTO = 25.0;
 
@@ -35,13 +35,14 @@ public class TopicoArTemperaturaCallback extends Activity implements TopicoCallb
     public void doMessageArrived(MqttMessage message) throws Exception {
         runOnUiThread(new Runnable(){
             public void run() {
-                TextView txtTemperatura = (TextView) ((Activity) context).findViewById(R.id.temperatura);
+                ArCondicionadoActivity contextoAr = ((ArCondicionadoActivity) context);
+                TextView txtTemperatura = (TextView) contextoAr.findViewById(R.id.temperatura);
                 txtTemperatura.setText(message.toString());
 
                 Log.d(TAG, message.toString());
                 double temperatura = Double.parseDouble(message.toString());
                 if (temperatura >= TEMPERATURA_ACIONAMENTO) {
-                    ((ArCondicionadoActivity) context).ligarAr();
+                    contextoAr.ligarAr();
                 }
             }
         });

@@ -14,6 +14,8 @@ public class ArCondicionadoActivity extends AppCompatActivity {
 
     public ClienteBroker client;
 
+    public static Boolean arLigado = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
