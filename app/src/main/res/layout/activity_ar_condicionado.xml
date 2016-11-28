@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_ar_condicionado"
     android:layout_width="match_parent"
@@ -11,12 +12,27 @@
     tools:context="com.smarthouse_br.smarthouse.ArCondicionadoActivity">
 
     <TextView
-        android:text="28 ºC"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="68dp"
         android:id="@+id/temperatura"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+        android:textColor="@android:color/holo_red_dark"
+        android:text="..." />
+
+    <Switch
+        android:text="Acionamento Automático"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnLigarAr"
+        android:layout_marginTop="59dp"
+        android:onClick="toggleAcionamentoAutomatico"
+        android:checked="true"
+        android:switchPadding="50dp"
+        android:textSize="18sp"
+        android:layout_below="@+id/temperatura"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

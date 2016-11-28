@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class ClienteBroker implements MqttCallback {
 
-    private static final String TAG = "MAIN";
+    private static final String TAG = "Broker";
     String broker = "tcp://m13.cloudmqtt.com:18768";
     String clientId = "appAndroid";
     String username = "mdzjtvif";

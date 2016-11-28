@@ -3,6 +3,7 @@ package com.smarthouse_br.smarthouse.com.smarthouse_br.smarthouse.mqtt;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.smarthouse_br.smarthouse.ArCondicionadoActivity;
@@ -36,13 +37,22 @@ public class TopicoArTemperaturaCallback extends Activity implements TopicoCallb
         runOnUiThread(new Runnable(){
             public void run() {
                 ArCondicionadoActivity contextoAr = ((ArCondicionadoActivity) context);
-                TextView txtTemperatura = (TextView) contextoAr.findViewById(R.id.temperatura);
-                txtTemperatura.setText(message.toString());
 
-                Log.d(TAG, message.toString());
+                TextView txtTemperatura = (TextView) contextoAr.findViewById(R.id.temperatura);
+
+                txtTemperatura.setText(message.toString() + "º C");
+
                 double temperatura = Double.parseDouble(message.toString());
-                if (temperatura >= TEMPERATURA_ACIONAMENTO) {
-                    contextoAr.ligarAr();
+                Log.d(TAG, message.toString());
+                Log.d(TAG, contextoAr.acionamentoAutomatico.toString());
+                Log.d(TAG, contextoAr.arLigado.toString());
+                if (contextoAr.acionamentoAutomatico) {
+                    if (temperatura >= TEMPERATURA_ACIONAMENTO && !contextoAr.arLigado) {
+                        contextoAr.ligarAr();
+                    }
+                    if (temperatura < TEMPERATURA_ACIONAMENTO && contextoAr.arLigado) {
+                        contextoAr.desligarAr();
+                    }
                 }
             }
         });
