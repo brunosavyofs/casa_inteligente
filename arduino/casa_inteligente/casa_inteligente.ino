@@ -50,7 +50,6 @@ PubSubClient client(server, PORTA_MQTT, callback, ethClient);
 #define TP_AR_TEMPERATURA "casa/ar/temperatura"
 #define TP_AR_STATUS "casa/ar/status"
 
-//float temperatura;
 int status_ar = LOW;
 
 DHT dht(PINO_SENSOR_TEMP, TIPO_SENSOR);
@@ -58,9 +57,32 @@ DHT dht(PINO_SENSOR_TEMP, TIPO_SENSOR);
 
 // Configurações da funcionalidade 02 - Acionamento automático das luzes da garagem
 
+//Carrega a biblioteca do sensor ultrassonico
+#include <Ultrasonic.h>
+
+//Define os pinos para o trigger e echo
+#define PINO_TRIGGER 8
+#define PINO_ECHO 9
+#define PINO_LED_OCUPACAO 12
+// Distância que define se a garagem está ocupada
+#define DISTANCIA_OCUPADA 10
+#define TP_GARAGEM_STATUS "casa/garagem/status"
+
+int status_garagem = LOW;
 
 
-// Configurações da funcionalidade 03 - Alarme com utilização de sensor de movimento
+Ultrasonic ultrasonic(PINO_TRIGGER, PINO_ECHO);
+
+// Configurações da funcionalidade 03 - Alarme com utilização de sensor de movimento e buzzer
+
+#define PINO_BUZZER 10
+#define PINO_SENSOR_MOV 3
+#define PINO_LED_ALARME 7
+#define DELAY_SONORO 500
+#define FREQ_BUZZER 1500
+#define TP_ALARME_STATUS "casa/alarme/status"
+
+boolean alarme_disparado = false;
 
 
 void setup() {
@@ -68,10 +90,14 @@ void setup() {
 
   conectar_ethernet();
 
-//  conectar_mosquitto();
-
   // Setup da funcionalidade 01
   setup_ar();
+
+  // Setup da funcionalidade 02
+  setup_garagem();
+
+  // Setup da funcionalidade 03
+  setup_alarme();
 }
 
 void loop() {
@@ -80,8 +106,24 @@ void loop() {
     conectar_mosquitto();
   }
   client.loop();
+
   ler_temperatura();
-  Narcoleptic.delay(5000);
+
+  medir_distancia();
+
+  verificar_movimento();
+
+  if (alarme_disparado) {
+    //Ligando o buzzer com uma frequencia de 1500 hz.
+    tone(PINO_BUZZER, FREQ_BUZZER);   
+    delay(DELAY_SONORO);
+    
+    //Desligando o buzzer.
+    noTone(PINO_BUZZER);
+    delay(DELAY_SONORO);
+  } 
+
+  delay(500);
 }
 
 // Metodo para manipular mensagens recebidas do broker
@@ -136,6 +178,60 @@ void ligar_ar(int status) {
     digitalWrite(PINO_LED_AR, status);
 
     // Código para ligar o ar
+}
+
+
+// Métodos da funcionalidade 02
+
+void setup_garagem() {
+  pinMode(PINO_LED_OCUPACAO, OUTPUT);
+}
+
+float medir_distancia() {
+  long tempo = ultrasonic.timing();
+  int distancia = ultrasonic.convert(tempo, Ultrasonic::CM);
+
+  if (distancia <= DISTANCIA_OCUPADA) {
+    informar_ocupacao(HIGH);
+  } else {
+    informar_ocupacao(LOW);
+  }
+}
+
+void informar_ocupacao(int status) {
+  if (status_garagem != status) {
+    digitalWrite(PINO_LED_OCUPACAO, status);
+    status_garagem = status;
+    Serial.println("mudei um status");
+    client.publish(TP_GARAGEM_STATUS, status == 0 ? "0" : "1");
+  }
+}
+
+
+// Métodos da funcionalidade 03
+
+
+void setup_alarme() {
+  pinMode(PINO_SENSOR_MOV, INPUT);
+  pinMode(PINO_LED_ALARME, OUTPUT);
+  pinMode(PINO_BUZZER, OUTPUT);
+}
+
+void acionar_alarme() {
+  if (!alarme_disparado) {
+    client.publish(TP_ALARME_STATUS, "1");
+    alarme_disparado = true;
+    digitalWrite(PINO_LED_ALARME, HIGH);
+  } else {
+    digitalWrite(PINO_LED_ALARME, LOW);
+  }
+}
+
+void verificar_movimento() {  
+  Serial.println(digitalRead(PINO_SENSOR_MOV));
+  if (digitalRead(PINO_SENSOR_MOV) == HIGH) {
+    acionar_alarme();
+  }
 }
 
 
