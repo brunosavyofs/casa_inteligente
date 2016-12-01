@@ -1,4 +1,8 @@
 #define TEMPO_NOVA_TENTATIVA 5000
+#define PINO_LED_SETUP_OK 11
+
+// Carrega biblioteca para interrupção por tempo
+#include <MsTimer2.h>
 
 // Carrega biblioteca para economia de energia
 #include <Narcoleptic.h>
@@ -45,12 +49,10 @@ PubSubClient client(server, PORTA_MQTT, callback, ethClient);
 
 #define TIPO_SENSOR DHT11
 #define PINO_SENSOR_TEMP A1
-#define TEMPERATURA_ACIONAMENTO 15
 #define PINO_LED_AR 2
+
 #define TP_AR_TEMPERATURA "casa/ar/temperatura"
 #define TP_AR_STATUS "casa/ar/status"
-
-int status_ar = LOW;
 
 DHT dht(PINO_SENSOR_TEMP, TIPO_SENSOR);
 
@@ -63,9 +65,12 @@ DHT dht(PINO_SENSOR_TEMP, TIPO_SENSOR);
 //Define os pinos para o trigger e echo
 #define PINO_TRIGGER 8
 #define PINO_ECHO 9
-#define PINO_LED_OCUPACAO 12
+#define PINO_LED_OCUPACAO 4
+
 // Distância que define se a garagem está ocupada
 #define DISTANCIA_OCUPADA 10
+#define TEMPO_NOVA_LEITURA_GARAGEM 5000
+
 #define TP_GARAGEM_STATUS "casa/garagem/status"
 
 int status_garagem = LOW;
@@ -78,11 +83,17 @@ Ultrasonic ultrasonic(PINO_TRIGGER, PINO_ECHO);
 #define PINO_BUZZER 10
 #define PINO_SENSOR_MOV 3
 #define PINO_LED_ALARME 7
+#define INTERRUPCAO_ALARME 1
+
 #define DELAY_SONORO 500
 #define FREQ_BUZZER 1500
+#define ALARME_ACIONADO 1
+#define ALARME_DESATIVADO 2
+#define ALARME_ATIVADO 0
+
 #define TP_ALARME_STATUS "casa/alarme/status"
 
-boolean alarme_disparado = false;
+volatile int status_alarme = ALARME_ATIVADO;
 
 
 void setup() {
@@ -98,6 +109,8 @@ void setup() {
 
   // Setup da funcionalidade 03
   setup_alarme();
+  MsTimer2::start();
+  pinMode(PINO_LED_SETUP_OK, OUTPUT);
 }
 
 void loop() {
@@ -109,21 +122,12 @@ void loop() {
 
   ler_temperatura();
 
-  medir_distancia();
-
-  verificar_movimento();
-
-  if (alarme_disparado) {
-    //Ligando o buzzer com uma frequencia de 1500 hz.
-    tone(PINO_BUZZER, FREQ_BUZZER);   
-    delay(DELAY_SONORO);
-    
-    //Desligando o buzzer.
-    noTone(PINO_BUZZER);
-    delay(DELAY_SONORO);
+  if (status_alarme == ALARME_ACIONADO) {
+    acionar_buzzer();
   } 
-
-  delay(500);
+  digitalWrite(PINO_LED_ALARME, LOW);
+  
+  delay(1000);
 }
 
 // Metodo para manipular mensagens recebidas do broker
@@ -139,9 +143,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   Serial.println("Mensagem: " + msgString);
 
-  //TODO: Utilizar um case
   if (String(topic) == String(TP_AR_STATUS)) {
-    ligar_ar(msgString.toInt());
+    tratar_status_ar(msgString.toInt());
+  } else if (String(topic) == String(TP_ALARME_STATUS)) {
+    tratar_status_alarme(msgString.toInt());
   }
 }
 
@@ -152,9 +157,11 @@ void setup_ar() {
   pinMode(PINO_SENSOR_TEMP, INPUT);
   pinMode(PINO_LED_AR, OUTPUT);
   dht.begin();
+
+//  MsTimer2::set(1000, ler_temperatura);
 }
 
-int ler_temperatura() {
+void ler_temperatura() {
   float temperatura = dht.readTemperature();
   // testa se retorno é valido, caso contrário algo está errado.
   if (isnan(temperatura)) {
@@ -174,10 +181,9 @@ void informar_temperatura(float temperatura) {
   client.publish(TP_AR_TEMPERATURA, aux_char);
 }
 
-void ligar_ar(int status) {
+void tratar_status_ar(int status) {
+    //Liga/Desliga o LED que representa o ar
     digitalWrite(PINO_LED_AR, status);
-
-    // Código para ligar o ar
 }
 
 
@@ -185,11 +191,13 @@ void ligar_ar(int status) {
 
 void setup_garagem() {
   pinMode(PINO_LED_OCUPACAO, OUTPUT);
+
+  MsTimer2::set(TEMPO_NOVA_LEITURA_GARAGEM, medir_distancia);
 }
 
 float medir_distancia() {
-  long tempo = ultrasonic.timing();
-  int distancia = ultrasonic.convert(tempo, Ultrasonic::CM);
+  volatile long tempo = ultrasonic.timing();
+  volatile int distancia = ultrasonic.convert(tempo, Ultrasonic::CM);
 
   if (distancia <= DISTANCIA_OCUPADA) {
     informar_ocupacao(HIGH);
@@ -198,7 +206,7 @@ float medir_distancia() {
   }
 }
 
-void informar_ocupacao(int status) {
+void informar_ocupacao(volatile int status) {
   if (status_garagem != status) {
     digitalWrite(PINO_LED_OCUPACAO, status);
     status_garagem = status;
@@ -215,23 +223,37 @@ void setup_alarme() {
   pinMode(PINO_SENSOR_MOV, INPUT);
   pinMode(PINO_LED_ALARME, OUTPUT);
   pinMode(PINO_BUZZER, OUTPUT);
+
+  attachInterrupt(INTERRUPCAO_ALARME, verificar_movimento, RISING);
 }
 
-void acionar_alarme() {
-  if (!alarme_disparado) {
+volatile void acionar_alarme() {
+  digitalWrite(PINO_LED_ALARME, HIGH);
+  if (status_alarme == ALARME_ATIVADO) {
     client.publish(TP_ALARME_STATUS, "1");
-    alarme_disparado = true;
-    digitalWrite(PINO_LED_ALARME, HIGH);
-  } else {
-    digitalWrite(PINO_LED_ALARME, LOW);
+    status_alarme = ALARME_ACIONADO;
   }
 }
 
 void verificar_movimento() {  
   Serial.println(digitalRead(PINO_SENSOR_MOV));
-  if (digitalRead(PINO_SENSOR_MOV) == HIGH) {
+  if (digitalRead(PINO_SENSOR_MOV)) {
     acionar_alarme();
   }
+}
+
+void tratar_status_alarme(int status_recebido) {
+  status_alarme = status_recebido;
+}
+
+void acionar_buzzer() {
+  //Ligando o buzzer com uma frequencia de 1500 hz.
+  tone(PINO_BUZZER, FREQ_BUZZER);   
+  delay(DELAY_SONORO);
+  
+  //Desligando o buzzer.
+  noTone(PINO_BUZZER);
+  delay(DELAY_SONORO);
 }
 
 
@@ -243,7 +265,9 @@ void conectar_mosquitto() {
     Serial.print("Conectando com mosquitto broker...");
     if (client.connect("casa", USUARIO_MQTT, SENHA_MQTT)) {
       Serial.println(" conectado!");
-      client.subscribe("casa/ar/status");
+      client.subscribe(TP_AR_STATUS);
+      client.subscribe(TP_ALARME_STATUS);
+      analogWrite(PINO_LED_SETUP_OK, 255);
     } else {
       Serial.print("falha, rc=");
       Serial.println(client.state());
