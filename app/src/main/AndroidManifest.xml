@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
@@ -20,8 +21,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ArCondicionadoActivity"
-            android:parentActivityName=".MonitoramentoActivity"></activity>
+        <activity
+            android:name=".ArCondicionadoActivity"
+            android:label="Ar Condicionado">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.smarthouse_br.smarthouse.MonitoramentoActivity" />
+        </activity>
+        <activity
+            android:name=".AlarmeActivity"
+            android:label="Alarme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.smarthouse_br.smarthouse.MonitoramentoActivity" />
+        </activity>
+        <activity android:name=".GaragemActivity"></activity>
     </application>
 
 </manifest>

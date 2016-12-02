@@ -3,7 +3,6 @@ package com.smarthouse_br.smarthouse.com.smarthouse_br.smarthouse.mqtt;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.smarthouse_br.smarthouse.ArCondicionadoActivity;
@@ -21,7 +20,9 @@ public class TopicoArTemperaturaCallback extends Activity implements TopicoCallb
 
     public static final String ID_TOPICO = "casa/ar/temperatura";
 
-    private static final double TEMPERATURA_ACIONAMENTO = 25.0;
+    public static double temperaturaAcionamento = 20.0;
+
+    public static final String STRING_GRAUS = " ºC";
 
     public TopicoArTemperaturaCallback(Context context) {
         this.context = context;
@@ -38,19 +39,19 @@ public class TopicoArTemperaturaCallback extends Activity implements TopicoCallb
             public void run() {
                 ArCondicionadoActivity contextoAr = ((ArCondicionadoActivity) context);
 
-                TextView txtTemperatura = (TextView) contextoAr.findViewById(R.id.temperatura);
+                TextView txtTemperatura = (TextView) contextoAr.findViewById(R.id.txtStatusAlarme);
 
-                txtTemperatura.setText(message.toString() + "º C");
+                txtTemperatura.setText(message.toString() + STRING_GRAUS);
 
                 double temperatura = Double.parseDouble(message.toString());
                 Log.d(TAG, message.toString());
                 Log.d(TAG, contextoAr.acionamentoAutomatico.toString());
                 Log.d(TAG, contextoAr.arLigado.toString());
-                if (contextoAr.acionamentoAutomatico) {
-                    if (temperatura >= TEMPERATURA_ACIONAMENTO && !contextoAr.arLigado) {
+                if (contextoAr.acionamentoAutomatico && contextoAr.verificarRedeSemFio()) {
+                    if (temperatura >= temperaturaAcionamento && !contextoAr.arLigado) {
                         contextoAr.ligarAr();
                     }
-                    if (temperatura < TEMPERATURA_ACIONAMENTO && contextoAr.arLigado) {
+                    if (temperatura < temperaturaAcionamento && contextoAr.arLigado) {
                         contextoAr.desligarAr();
                     }
                 }

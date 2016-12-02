@@ -23,29 +23,39 @@
         <ImageButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:srcCompat="@mipmap/ic_air_conditioner_black_48dp"
+            app:srcCompat="@mipmap/ic_air_conditioner_white_48dp"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="58dp"
-            android:id="@+id/imageButton7"
-            android:onClick="abreTelaArCondicionado" />
+            android:id="@+id/btnAr"
+            android:onClick="abreTelaArCondicionado"
+            android:background="@color/colorPrimary"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp" />
 
         <ImageButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:srcCompat="@mipmap/ic_security_home_black_48dp"
+            app:srcCompat="@mipmap/ic_security_home_white_48dp"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="58dp"
-            android:id="@+id/imageButton4" />
+            android:id="@+id/btnAlarme"
+            android:onClick="abreTelaAlarme"
+            android:background="@color/colorPrimary"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp" />
 
         <ImageButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:srcCompat="@mipmap/ic_air_conditioner_black_48dp"
+            app:srcCompat="@mipmap/ic_air_conditioner_white_48dp"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="58dp"
-            android:id="@+id/imageButton6" />
+            android:id="@+id/imageButton6"
+            android:background="@color/colorPrimary"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp" />
     </LinearLayout>
 </RelativeLayout>

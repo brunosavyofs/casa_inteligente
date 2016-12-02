@@ -1,10 +1,9 @@
 package com.smarthouse_br.smarthouse;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.EditText;
 
 public class MonitoramentoActivity extends AppCompatActivity {
 
@@ -17,6 +16,12 @@ public class MonitoramentoActivity extends AppCompatActivity {
     public void abreTelaArCondicionado(View v) {
         // Invoca a tela de monitoramento do ar condicionado
         Intent chamada = new Intent(getApplicationContext(), ArCondicionadoActivity.class);
+        startActivity(chamada);
+    }
+
+    public void abreTelaAlarme(View v) {
+        // Invoca a tela de monitoramento do ar condicionado
+        Intent chamada = new Intent(getApplicationContext(), AlarmeActivity.class);
         startActivity(chamada);
     }
 }

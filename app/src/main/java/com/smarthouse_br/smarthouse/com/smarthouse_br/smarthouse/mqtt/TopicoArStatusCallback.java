@@ -5,9 +5,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
 import android.widget.Switch;
-import android.widget.TextSwitcher;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import com.smarthouse_br.smarthouse.ArCondicionadoActivity;
 import com.smarthouse_br.smarthouse.R;
@@ -42,7 +40,7 @@ public class TopicoArStatusCallback extends Activity implements TopicoCallback {
         runOnUiThread(new Runnable(){
             public void run() {
                 ArCondicionadoActivity contextoAr = ((ArCondicionadoActivity) context);
-                TextView txtTemperatura = (TextView) contextoAr.findViewById(R.id.temperatura);
+                TextView txtTemperatura = (TextView) contextoAr.findViewById(R.id.txtStatusAlarme);
                 Switch btnLigarAr = (Switch) contextoAr.findViewById(R.id.btnLigarAr);
 
                 Boolean ligar = (Integer.parseInt(message.toString()) == TopicoArStatusCallback.STATUS_ON);
@@ -58,8 +56,8 @@ public class TopicoArStatusCallback extends Activity implements TopicoCallback {
                         txtTemperatura.setTextColor(Color.RED);
                     }
 
+                    btnLigarAr.setChecked(contextoAr.acionamentoAutomatico);
                     contextoAr.arLigado = !contextoAr.arLigado;
-                    btnLigarAr.setChecked(ligar);
                 }
             }
         });

@@ -1,21 +1,25 @@
 package com.smarthouse_br.smarthouse;
 
+import android.content.Context;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.smarthouse_br.smarthouse.com.smarthouse_br.smarthouse.mqtt.ClienteBroker;
 import com.smarthouse_br.smarthouse.com.smarthouse_br.smarthouse.mqtt.TopicoArStatusCallback;
 import com.smarthouse_br.smarthouse.com.smarthouse_br.smarthouse.mqtt.TopicoArTemperaturaCallback;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
-
 public class ArCondicionadoActivity extends AppCompatActivity {
     private static final String TAG = "Ar";
-    public static final String TOPICO_AR_STATUS = "casa/ar/status";
+    private static final String SSID_REDE_CASA = "\"WaynetV2\"";
 
     public ClienteBroker client;
 
@@ -43,22 +47,40 @@ public class ArCondicionadoActivity extends AppCompatActivity {
             }
         });
 
+        SeekBar seekTemp = (SeekBar) findViewById(R.id.seekTemperatura);
+        TextView tempAcionamento = (TextView) findViewById(R.id.txtTemperaturaAcionamento);
+        seekTemp.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+                tempAcionamento.setText(String.valueOf(progress) + TopicoArTemperaturaCallback.STRING_GRAUS);
+                if (progress != TopicoArTemperaturaCallback.temperaturaAcionamento) {
+                    TopicoArTemperaturaCallback.temperaturaAcionamento = progress;
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) { }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) { }
+        });
+
+        seekTemp.setProgress((int) Math.round(TopicoArTemperaturaCallback.temperaturaAcionamento));
+
     }
 
     public void ligarAr() {
         this.client.publish(new TopicoArStatusCallback(ArCondicionadoActivity.this), TopicoArStatusCallback.STATUS_ON.toString());
-
     }
 
     public void desligarAr() {
         this.client.publish(new TopicoArStatusCallback(ArCondicionadoActivity.this), TopicoArStatusCallback.STATUS_OFF.toString());
-
     }
 
-    public void toggleAcionamentoAutomatico(View view) {
-        Log.d(TAG, "acionei");
-        Switch btnLigarAr = (Switch) findViewById(R.id.btnLigarAr);
-        this.acionamentoAutomatico = btnLigarAr.isChecked();
-        btnLigarAr.toggle();
+    public boolean verificarRedeSemFio() {
+        WifiManager wifiManager = (WifiManager) ArCondicionadoActivity.this.getSystemService(Context.WIFI_SERVICE);
+        return wifiManager.getConnectionInfo().getSSID().equals(this.SSID_REDE_CASA);
     }
 }
