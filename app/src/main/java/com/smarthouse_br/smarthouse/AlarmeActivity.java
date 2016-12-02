@@ -3,14 +3,12 @@ package com.smarthouse_br.smarthouse;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import com.smarthouse_br.smarthouse.com.smarthouse_br.smarthouse.mqtt.ClienteBroker;
 import com.smarthouse_br.smarthouse.com.smarthouse_br.smarthouse.mqtt.TopicoAlarmeStatusCallback;
-import com.smarthouse_br.smarthouse.com.smarthouse_br.smarthouse.mqtt.TopicoArStatusCallback;
 
 public class AlarmeActivity extends AppCompatActivity {
     private static final String TAG = "Alarme";

@@ -35,7 +35,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.smarthouse_br.smarthouse.MonitoramentoActivity" />
         </activity>
-        <activity android:name=".GaragemActivity"></activity>
+        <activity android:name=".GaragemActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.smarthouse_br.smarthouse.MonitoramentoActivity" />
+        </activity>
     </application>
 
 </manifest>

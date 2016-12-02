@@ -40,7 +40,7 @@ public class TopicoArStatusCallback extends Activity implements TopicoCallback {
         runOnUiThread(new Runnable(){
             public void run() {
                 ArCondicionadoActivity contextoAr = ((ArCondicionadoActivity) context);
-                TextView txtTemperatura = (TextView) contextoAr.findViewById(R.id.txtStatusAlarme);
+                TextView txtTemperatura = (TextView) contextoAr.findViewById(R.id.txtStatusGaragem);
                 Switch btnLigarAr = (Switch) contextoAr.findViewById(R.id.btnLigarAr);
 
                 Boolean ligar = (Integer.parseInt(message.toString()) == TopicoArStatusCallback.STATUS_ON);

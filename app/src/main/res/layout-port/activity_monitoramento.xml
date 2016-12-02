@@ -49,11 +49,12 @@
         <ImageButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:srcCompat="@mipmap/ic_air_conditioner_white_48dp"
+            app:srcCompat="@mipmap/ic_car_connected_white_48dp"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="58dp"
-            android:id="@+id/imageButton6"
+            android:id="@+id/btnGaragem"
+            android:onClick="abreTelaGaragem"
             android:background="@color/colorPrimary"
             android:paddingBottom="5dp"
             android:paddingTop="5dp" />

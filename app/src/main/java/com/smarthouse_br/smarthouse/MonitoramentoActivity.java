@@ -24,4 +24,10 @@ public class MonitoramentoActivity extends AppCompatActivity {
         Intent chamada = new Intent(getApplicationContext(), AlarmeActivity.class);
         startActivity(chamada);
     }
+
+    public void abreTelaGaragem(View v) {
+        // Invoca a tela de monitoramento do ar condicionado
+        Intent chamada = new Intent(getApplicationContext(), GaragemActivity.class);
+        startActivity(chamada);
+    }
 }

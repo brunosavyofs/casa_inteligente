@@ -39,7 +39,7 @@ public class TopicoArTemperaturaCallback extends Activity implements TopicoCallb
             public void run() {
                 ArCondicionadoActivity contextoAr = ((ArCondicionadoActivity) context);
 
-                TextView txtTemperatura = (TextView) contextoAr.findViewById(R.id.txtStatusAlarme);
+                TextView txtTemperatura = (TextView) contextoAr.findViewById(R.id.txtStatusGaragem);
 
                 txtTemperatura.setText(message.toString() + STRING_GRAUS);
 
